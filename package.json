@@ -36,7 +36,7 @@
     "npm": "7.19.1"
   },
   "devDependencies": {
-    "@effection/fetch": "^2.0.1",
+    "@effection/fetch": "^2.0.4",
     "deepmerge": "^4.2.2"
   }
 }
