@@ -23,6 +23,8 @@ export type Routes =
   | '/oauth/token'
   | '/v2/logout'
   | '/userinfo'
+  | '/api/v2/users'
+  | '/api/v2/users/:id'
 
 type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
 
@@ -164,6 +166,59 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       res.status(302).redirect(routerUrl);
     },
 
+    ['/api/v2/users']: function* (req, res) {
+      let { q } = req.query;
+      // expect q to be of the form email:"name@doamin.com"
+      if(q === undefined) {
+        res.status(400)
+      }
+      const regex = /"/gm
+      let username = (q as String).split(":")[1].replace(regex,'');
+      console.log("looking for " + username)
+      let user = personQuery(([, person]) => {
+        assert(!!person.email, `no email defined on person scenario`);
+
+        return person.email.toLowerCase() === username.toLowerCase();
+      });
+
+      if(!user) {
+        res.status(404).send('not found');
+        return;
+      }
+      let niceUser = {
+        email: user.email,
+        email_verified: true,
+	      user_id: user.id,
+	      user_metadata: {}
+      }
+      res.status(200).json(niceUser)
+    },
+    ['/api/v2/users/:id']: function* (req, res) {
+      const uid = req.params.id;
+      if (uid === undefined) {
+        res.status(404);
+        return;
+      }
+      console.log("looking for " + uid)
+      let user = personQuery(([, person]) => {
+        assert(!!person.email, `no email defined on person scenario`);
+
+        return person.id === uid;
+      });
+
+      if(!user) {
+        res.status(404).send('not found');
+        return;
+      }
+      let niceUser = {
+        email: user.email,
+        email_verified: true,
+	      user_id: user.id,
+	      user_metadata: {}
+      }
+      res.status(200).json(niceUser)
+    },
+
     ['/oauth/token']: function* (req, res) {
       let { code, grant_type } = req.body;
 
@@ -172,13 +227,27 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let username: string;
       let password: string | undefined;
 
-      if (grant_type === 'password') {
-        username = req.body.username;
-        password = req.body.password;
-      } else {
-        assert(typeof code !== 'undefined', 'no code in /oauth/token');
-
-        [nonce, username] = decode(code).split(":");
+      switch(grant_type) {
+        case 'password': {
+          username = req.body.username;
+          password = req.body.password;
+          break;
+        }
+        case 'client_credentials': {
+          const  client_id = req.body.client_id;
+          const aud = req.body.audience;
+          if (client_id !== clientID || aud !== audience) {
+            res.status(401).send("client id or audience incorrect");
+            return;
+          }
+          username = "server";
+          password = "serverpwd";
+          break
+        }
+        default:  {
+          assert(typeof code !== 'undefined', 'no code in /oauth/token');
+          [nonce, username] = decode(code).split(":");
+        }
       }
 
       if (!username) {
@@ -224,7 +293,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let userData = {} as RuleUser;
       let context = { clientID, accessToken: { scope }, idToken: idTokenData };
-
       rulesRunner(userData, context);
 
       let idToken = createJsonWebToken({ ...userData, ...context.idToken });

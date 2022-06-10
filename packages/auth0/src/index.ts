@@ -37,7 +37,9 @@ const createAuth0Service = (handlers: Auth0Handlers, { port, debug }: { port: nu
     .get('/userinfo', handlers['/userinfo'])
     .get('/v2/logout', handlers['/v2/logout'])
     .get('/.well-known/jwks.json', handlers['/.well-known/jwks.json'])
-    .get('/.well-known/openid-configuration', handlers['/.well-known/openid-configuration']);
+    .get('/.well-known/openid-configuration', handlers['/.well-known/openid-configuration'])
+    .get('/api/v2/users', handlers['/api/v2/users'])
+    .get('/api/v2/users/:id', handlers['/api/v2/users/:id']);
 
   if(debug) {
     app = app.use(consoleLogger);
