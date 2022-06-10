@@ -17,6 +17,7 @@ export interface Person {
   email?: string;
   password?: string;
   picture?: string;
+  user_metadata?: Record<string, any>
 }
 
 export type OptionalParams<T extends { id: string }> = Partial<Omit<T, 'id'>>;
@@ -36,7 +37,8 @@ export function person(store: Store, faker: Faker, params: Partial<Person> = {})
       id,
       name,
       email: params.email ?? faker.internet.email(name).toLowerCase(),
-      password: params.password ?? faker.internet.password()
+      password: params.password ?? faker.internet.password(),
+      user_metadata: params.user_metadata
     };
 
     slice.set(attrs);
