@@ -1,6 +1,6 @@
 {
-  "name": "@simulacrum/auth0-simulator",
-  "version": "0.6.2",
+  "name": "@simulacrum-dblp/auth0-simulator",
+  "version": "0.6.3",
   "description": "Run local instance of Auth0 API for local development and integration testing",
   "main": "dist/index.js",
   "bin": "bin/index.js",
@@ -11,7 +11,8 @@
     "build": "npm run prepack",
     "lint": "eslint src bin test",
     "start": "node dist/start.js",
-    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
+    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
