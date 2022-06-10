@@ -23,6 +23,8 @@ export type Routes =
   | '/oauth/token'
   | '/v2/logout'
   | '/userinfo'
+  | '/api/v2/users'
+  | '/api/v2/users/:id'
 
 type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
 
@@ -162,6 +164,59 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let routerUrl = `${redirect_uri}?${qs}`;
 
       res.status(302).redirect(routerUrl);
+    },
+
+    ['/api/v2/users']: function* (req, res) {
+      let { q } = req.query;
+      // expect q to be of the form email:"name@doamin.com"
+      if(q === undefined) {
+        res.status(400)
+      }
+      const regex = /"/gm
+      let username = (q as String).split(":")[1].replace(regex,'');
+      console.log("looking for " + username)
+      let user = personQuery(([, person]) => {
+        assert(!!person.email, `no email defined on person scenario`);
+
+        return person.email.toLowerCase() === username.toLowerCase();
+      });
+
+      if(!user) {
+        res.status(404).send('not found');
+        return;
+      }
+      let niceUser = {
+        email: user.email,
+        email_verified: true,
+	      user_id: user.id,
+	      user_metadata: {}
+      }
+      res.status(200).json(niceUser)
+    },
+    ['/api/v2/users/:id']: function* (req, res) {
+      const uid = req.params.id;
+      if (uid === undefined) {
+        res.status(404);
+        return;
+      }
+      console.log("looking for " + uid)
+      let user = personQuery(([, person]) => {
+        assert(!!person.email, `no email defined on person scenario`);
+
+        return person.id === uid;
+      });
+
+      if(!user) {
+        res.status(404).send('not found');
+        return;
+      }
+      let niceUser = {
+        email: user.email,
+        email_verified: true,
+	      user_id: user.id,
+	      user_metadata: {}
+      }
+      res.status(200).json(niceUser)
     },
 
     ['/oauth/token']: function* (req, res) {
