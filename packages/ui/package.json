@@ -10,7 +10,8 @@
     "watch": "parcel watch",
     "build": "npm run prepack",
     "lint": "eslint app index.js",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",

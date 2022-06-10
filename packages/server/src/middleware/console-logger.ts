@@ -1,4 +1,4 @@
-import type { Middleware } from 'src';
+import type { Middleware } from '../';
 
 function getFormattedDate(): string {
   let timestamp = new Date();

@@ -17,13 +17,17 @@ export interface Person {
   email?: string;
   password?: string;
   picture?: string;
+  user_metadata?: Record<string, any>
 }
 
 export type OptionalParams<T extends { id: string }> = Partial<Omit<T, 'id'>>;
 
-export function person(store: Store, faker: Faker, params: OptionalParams<Person> = {}): Operation<Person> {
+export function person(store: Store, faker: Faker, params: Partial<Person> = {}): Operation<Person> {
   return function*() {
     let id = v4();
+    if (params.id) {
+      id = params.id;
+    }
     let slice = records(store).slice(id);
 
     let name = params.name ?? faker.name.findName();
@@ -33,7 +37,8 @@ export function person(store: Store, faker: Faker, params: OptionalParams<Person
       id,
       name,
       email: params.email ?? faker.internet.email(name).toLowerCase(),
-      password: params.password ?? faker.internet.password()
+      password: params.password ?? faker.internet.password(),
+      user_metadata: params.user_metadata
     };
 
     slice.set(attrs);

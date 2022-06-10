@@ -1,6 +1,6 @@
 {
-  "name": "@simulacrum/server",
-  "version": "0.6.0",
+  "name": "@simulacrum-dblp/server",
+  "version": "0.6.1",
   "description": "A server containing simulation state, and the control API to manipulate it",
   "main": "dist/index.js",
   "scripts": {
@@ -10,7 +10,8 @@
     "build": "npm run prepack",
     "lint": "eslint src test watch.ts",
     "start": "node dist/start.js",
-    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
+    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -27,13 +28,13 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
-    "@effection/atom": "^2.0.1",
-    "@effection/process": "^2.0.1",
+    "@effection/atom": "^2.0.4",
+    "@effection/process": "^2.0.4",
     "@simulacrum/ui": "0.3.2",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "cors": "^2.8.5",
-    "effection": "^2.0.1",
+    "effection": "^2.0.4",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "faker": "^5.5.0",
@@ -45,7 +46,7 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "@effection/mocha": "^2.0.1",
+    "@effection/mocha": "^2.0.4",
     "@frontside/eslint-config": "^3.1.0",
     "@frontside/tsconfig": "^3.0.0",
     "@frontside/typescript": "^3.0.0",

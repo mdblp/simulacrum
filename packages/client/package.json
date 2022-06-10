@@ -9,7 +9,8 @@
     "prepack": "tsc --build",
     "build": "npm run prepack",
     "lint": "eslint src",
-    "test": "echo client is used to test server"
+    "test": "echo client is used to test server",
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "effection": "^2.0.1",
