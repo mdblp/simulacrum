@@ -172,13 +172,27 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let username: string;
       let password: string | undefined;
 
-      if (grant_type === 'password') {
-        username = req.body.username;
-        password = req.body.password;
-      } else {
-        assert(typeof code !== 'undefined', 'no code in /oauth/token');
-
-        [nonce, username] = decode(code).split(":");
+      switch(grant_type) {
+        case 'password': {
+          username = req.body.username;
+          password = req.body.password;
+          break;
+        }
+        case 'client_credentials': {
+          const  client_id = req.body.client_id;
+          const aud = req.body.audience;
+          if (client_id !== clientID || aud !== audience) {
+            res.status(401).send("client id or audience incorrect");
+            return;
+          }
+          username = "server";
+          password = "serverpwd";
+          break
+        }
+        default:  {
+          assert(typeof code !== 'undefined', 'no code in /oauth/token');
+          [nonce, username] = decode(code).split(":");
+        }
       }
 
       if (!username) {
@@ -224,7 +238,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let userData = {} as RuleUser;
       let context = { clientID, accessToken: { scope }, idToken: idTokenData };
-
       rulesRunner(userData, context);
 
       let idToken = createJsonWebToken({ ...userData, ...context.idToken });
