@@ -189,9 +189,9 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         email: user.email,
         email_verified: true,
 	      user_id: user.id,
-	      user_metadata: {}
+	      user_metadata: user.user_metadata
       }
-      res.status(200).json(niceUser)
+      res.status(200).json([niceUser])
     },
     ['/api/v2/users/:id']: function* (req, res) {
       const uid = req.params.id;
@@ -235,11 +235,11 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         }
         case 'client_credentials': {
           const  client_id = req.body.client_id;
-          const aud = req.body.audience;
-          if (client_id !== clientID || aud !== audience) {
-            res.status(401).send("client id or audience incorrect");
+          if (client_id !== clientID) {
+            res.status(401).send("client id incorrect");
             return;
           }
+          // hardcode server account for now
           username = "server";
           password = "serverpwd";
           break
@@ -273,6 +273,10 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       }
 
       let url = getServiceUrlFromOptions(options).toString();
+      const proxyUrl = req.header("auth0Url")
+      if ( proxyUrl !== undefined && proxyUrl !== "") {
+        url = proxyUrl
+      }
 
       assert(!!clientID, 'no clientID in options');
 
