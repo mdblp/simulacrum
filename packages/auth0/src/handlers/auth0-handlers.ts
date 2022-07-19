@@ -335,28 +335,30 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let [, token] = authorizationHeader.split(' ');
 
-      let { sub } = decodeToken(token, { json: true }) as { sub: string };
-
+      let { sub, uid } = decodeToken(token, { json: true }) as { uid: string; sub: string};
+      console.log(`/userinfo: looking for sub ${sub}`)
       let user = personQuery(([, person]) => {
         assert(!!person.id, `no email defined on person scenario`);
 
-        return person.id === sub;
+        return person.id === sub || person.id === uid;
       });
 
-      assert(!!user, 'no user in /userinfo');
-
-      let userinfo = {
-        sub,
-        name: user.name,
-        given_name: user.name,
-        family_name: user.name,
-        email: user.email,
-        email_verified: true,
-        locale: 'en',
-        hd: 'okta.com'
-       };
-
-      res.status(200).json(userinfo);
+      if (!user) {
+        res.status(404).send('not found');
+      } else {
+        let userinfo = {
+          sub,
+          name: user.name,
+          given_name: user.name,
+          family_name: user.name,
+          email: user.email,
+          email_verified: true,
+          locale: 'en',
+          hd: 'okta.com'
+         };
+  
+        res.status(200).json(userinfo);
+      }
     }
   };
 };

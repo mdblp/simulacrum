@@ -24,7 +24,7 @@ export type OptionalParams<T extends { id: string }> = Partial<Omit<T, 'id'>>;
 
 export function person(store: Store, faker: Faker, params: Partial<Person> = {}): Operation<Person> {
   return function*() {
-    let id = v4();
+    let id =  v4().split('-').join('');
     if (params.id) {
       id = params.id;
     }
