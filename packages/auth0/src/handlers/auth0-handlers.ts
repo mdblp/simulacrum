@@ -151,19 +151,24 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     },
 
     ['/login/callback']: function* (req, res) {
-      let wctx = JSON.parse(req.body.wctx);
+        try {
+            let wctx = JSON.parse(req.body.wctx);
 
-      let { redirect_uri, state, nonce } = wctx;
+            let { redirect_uri, state, nonce } = wctx;
 
-      let { username } = store.slice('auth0', nonce).get();
+            let { username } = store.slice('auth0', nonce).get();
 
-      let encodedNonce = encode(`${nonce}:${username}`);
+            let encodedNonce = encode(`${nonce}:${username}`);
 
-      let qs = stringify({ code: encodedNonce, state, nonce });
+            let qs = stringify({ code: encodedNonce, state, nonce });
 
-      let routerUrl = `${redirect_uri}?${qs}`;
+            let routerUrl = `${redirect_uri}?${qs}`;
 
-      res.status(302).redirect(routerUrl);
+            res.status(302).redirect(routerUrl);
+        } catch (error) {
+            console.error('/login/callback error:', error);
+            res.status(500).send('Internal Server Error');
+        }
     },
 
     ['/api/v2/users']: function* (req, res) {
